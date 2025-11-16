@@ -7,5 +7,5 @@ int* criaRandomRam(int tam);
 void liberaRAM(int* ram);
 void store(int* ram, int pos, int dado);
 int load(int* ram, int pos);
-
+void printRam(int* ram, int qtd);
 #endif

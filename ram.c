@@ -1,5 +1,6 @@
 #include "ram.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 
 int* criaRam(int tam) {
@@ -41,4 +42,14 @@ void store(int* ram, int pos, int dado) {
 
 int load(int* ram, int pos) {
     return ram[pos];
+}
+
+void printRam(int* ram, int qtd) {
+    printf("RAM-> [");
+    for(int i = 0; i < qtd; i++) {
+        printf("%d", ram[i]);
+        if (i < qtd -1)
+            printf(", ");
+    }
+    printf("]\n");
 }
