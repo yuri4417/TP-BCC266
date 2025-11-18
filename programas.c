@@ -22,16 +22,15 @@ void programaAleatorio(int qtdeInstrucoes) {
     liberaRAM(RAM);
     free(programa);
 }
-
-// -1 - Fim do programa
-// 0 - soma                                   [OP, end1, end2, endSalvar]
-// 1 - subtracao                              [OP, end1, end2, endSalvar]
-// 2 - reg -> ram                             [OP, regFonte, posRam, -1]
-// 3 - ram -> reg                             [OP, regDestino, posRam, -1]
-// 4 - copia conteudo do exterior pro reg     [OP, regDestino, conteudo, -1]
-// 5 - copia conteudo do reg p/ exterior      [OP, regFonte, destino, -1]
-
-
+/*
+ -1 - Fim do programa
+ 0 - soma                                   [OP, end1, end2, endSalvar]
+ 1 - subtracao                              [OP, end1, end2, endSalvar]
+ 2 - reg -> ram                             [OP, regFonte, posRam, -1]
+ 3 - ram -> reg                             [OP, regDestino, posRam, -1]
+ 4 - copia conteudo do exterior pro reg     [OP, regDestino, conteudo, -1]
+ 5 - copia conteudo do reg p/ exterior      [OP, regFonte, destino, -1]
+*/ 
 void programaMultiplica(int * RAM, int multiplicando, int multiplicador) { // RESULTADO = RAM[0]
     int ramLocal = 0; //indica se é um programa isolado ou que faz parte de outro maior (se faz, usa a ram do programa principal)
     if (RAM == NULL) {
