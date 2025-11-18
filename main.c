@@ -12,6 +12,6 @@ int main () {
     // programaPA(0, 2, 10);
     // programaPG(1, 2, 10);
     //programaTrianguloRet(3, 5);
-    
+    //programaPotencia(NULL, 2, 2);
     return 0;
 }

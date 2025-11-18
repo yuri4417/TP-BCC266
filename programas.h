@@ -10,5 +10,6 @@ void programaPA(int A1, int razao, int qtdTermos);
 void programaPG(int A1, int razao, int qtdTermos);
 void programaTrianguloRet(int catA, int catB);
 void programaBhaskara(int a, int b, int c);
+void programaPotencia(int *RAM, int base, int expoente);
 
 #endif
