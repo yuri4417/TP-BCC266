@@ -8,4 +8,7 @@ void liberaRAM(int* ram);
 void store(int* ram, int pos, int dado);
 int load(int* ram, int pos);
 void printRam(int* ram, int qtd);
+void extraiRAM(int* RAM, int posRam, int *conteudo);
+void salvaUmValor(int* RAM, int pos, int val);
+void salvaDoisValores(int* RAM, int pos1, int val1, int pos2, int val2);
 #endif

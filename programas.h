@@ -9,4 +9,6 @@ void programaRaizQuad(int* RAM, int radicando);
 void programaPA(int A1, int razao, int qtdTermos);
 void programaPG(int A1, int razao, int qtdTermos);
 void programaTrianguloRet(int catA, int catB);
+void programaBhaskara(int a, int b, int c);
+
 #endif

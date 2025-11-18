@@ -1,7 +1,7 @@
 #include "ram.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "maquina.h"
 
 int* criaRam(int tam) {
     int* ram = malloc(tam*sizeof(int));
@@ -52,4 +52,56 @@ void printRam(int* ram, int qtd) {
             printf(", ");
     }
     printf("]\n");
+}
+void extraiRAM(int* RAM, int posRam, int *conteudo) {
+    
+    Instrucao moveReg[3];
+    moveReg[0].opcode = 3;
+    moveReg[0].endereco1 = 1;
+    moveReg[0].endereco2 = posRam;
+
+    moveReg[1].opcode = 5;
+    moveReg[1].endereco1 = 1;
+    moveReg[1].endereco2 = -1;
+
+    moveReg[2].opcode = -1;
+    maquina(RAM, moveReg);
+    *conteudo = moveReg[1].endereco2;
+}
+void salvaUmValor(int* RAM, int pos, int val) {
+    Instrucao moveReg[3];
+    moveReg[0].opcode = 4;
+    moveReg[0].endereco1 = 1;
+    moveReg[0].endereco2 = val;
+
+    moveReg[1].opcode = 2;
+    moveReg[1].endereco1 = 1;
+    moveReg[1].endereco2 = pos;
+
+    moveReg[2].opcode = -1;
+    maquina(RAM, moveReg);
+}
+
+void salvaDoisValores(int* RAM, int pos1, int val1, int pos2, int val2) {
+    Instrucao moveReg[5];
+
+    moveReg[0].opcode = 4;
+    moveReg[0].endereco1 = 1;      
+    moveReg[0].endereco2 = val1;    
+
+    moveReg[1].opcode = 4;
+    moveReg[1].endereco1 = 2;       
+    moveReg[1].endereco2 = val2;    
+
+    moveReg[2].opcode = 2;
+    moveReg[2].endereco1 = 1;       
+    moveReg[2].endereco2 = pos1;    
+
+    moveReg[3].opcode = 2;
+    moveReg[3].endereco1 = 2;       
+    moveReg[3].endereco2 = pos2;    
+
+
+    moveReg[4].opcode = -1;
+    maquina(RAM, moveReg);
 }
