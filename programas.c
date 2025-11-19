@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+
+
 void programaAleatorio(int qtdeInstrucoes) {
     int tamRAM = 1000;
     int *RAM = criaRandomRam(tamRAM);
@@ -22,16 +24,15 @@ void programaAleatorio(int qtdeInstrucoes) {
     liberaRAM(RAM);
     free(programa);
 }
-
-// -1 - Fim do programa
-// 0 - soma                                   [OP, end1, end2, endSalvar]
-// 1 - subtracao                              [OP, end1, end2, endSalvar]
-// 2 - reg -> ram                             [OP, regFonte, posRam, -1]
-// 3 - ram -> reg                             [OP, regDestino, posRam, -1]
-// 4 - copia conteudo do exterior pro reg     [OP, regDestino, conteudo, -1]
-// 5 - copia conteudo do reg p/ exterior      [OP, regFonte, destino, -1]
-
-
+/*
+ -1 - Fim do programa
+ 0 - soma                                   [OP, end1, end2, endSalvar]
+ 1 - subtracao                              [OP, end1, end2, endSalvar]
+ 2 - reg -> ram                             [OP, regFonte, posRam, -1]
+ 3 - ram -> reg                             [OP, regDestino, posRam, -1]
+ 4 - copia conteudo do exterior pro reg     [OP, regDestino, conteudo, -1]
+ 5 - copia conteudo do reg p/ exterior      [OP, regFonte, destino, -1]
+*/ 
 void programaMultiplica(int * RAM, int multiplicando, int multiplicador) { // RESULTADO = RAM[0]
     int ramLocal = 0;
     if (RAM == NULL) {
@@ -605,3 +606,102 @@ void programaConverteBinario(int numeroDec) {
     printf(")_2\n");
 }
 
+void programaPotencia(int *RAM, int base, int expoente)
+{
+    int ramLocal = 0;
+    if (RAM == NULL) {
+        RAM = criaRam_vazia(4);
+        ramLocal = 1;
+    }
+    
+    salvaDoisValores(RAM, 0, base, 0 , expoente);
+    Instrucao move[3];
+    move[0].opcode = 2;
+    move[0].endereco1 = 1;
+    move[0].endereco2 = 0; //na posição 0 da ram está salva a base
+
+    move[1].opcode = 2;
+    move[1].endereco1 = 2;
+    move[1].endereco2 = 1;//na posição 1 da ram está salva o expoente
+
+    move[2].opcode = -1;
+    
+    maquina(RAM, move);
+    int externoBase, externoExpoente;
+    if (RAM[0] == 0) {
+        extraiRAM(RAM,0, &externoBase);
+        extraiRAM(RAM,1, &externoExpoente);
+        if (RAM[1] <0) 
+            printf("Erro: %d ^ %d Divisao por zero\n", externoBase, externoExpoente); 
+        else if (RAM[1] == 0) 
+            printf("Erro: %d ^ %d Resultado indeterminado\n", externoBase, externoExpoente); 
+        else 
+            printf("%d ^ %d = %d\n", externoBase, externoExpoente, 0); 
+        
+        if (ramLocal) 
+            liberaRAM(RAM);
+        return;
+    }
+    if (RAM[1] == 0) {
+        extraiRAM(RAM,0, &externoBase);
+        extraiRAM(RAM,1, &externoExpoente);
+        printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
+        if (ramLocal) 
+            liberaRAM(RAM);
+        return;
+    }
+    if (RAM[0] == 1) {
+        extraiRAM(RAM,0, &externoBase);
+        extraiRAM(RAM,1, &externoExpoente);
+        printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
+        if (ramLocal) 
+            liberaRAM(RAM);
+        return;
+    }
+    if (RAM[0] == -1) {
+        extraiRAM(RAM,0, &externoBase);
+        extraiRAM(RAM,1, &externoExpoente);
+        if (RAM[1] % 2 == 0) 
+            printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
+        else 
+            printf("%d ^ %d = %d\n", externoBase, externoExpoente, -1); 
+        if (ramLocal) 
+            liberaRAM(RAM);
+        return;
+    }
+    if (RAM[1] < 0) {
+        extraiRAM(RAM,0, &externoBase);
+        extraiRAM(RAM,1, &externoExpoente);
+        printf("%d ^ %d = %d\n", externoBase, externoExpoente, 0);
+        if (ramLocal) 
+            liberaRAM(RAM);
+        return;
+    
+    }
+    
+    Instrucao moverPCalcular[3];//Essa struct irá pegar o valor  da base na RAM[0] mover para o reg1 e depois levá-la para a RAM[2]
+    moverPCalcular[0].opcode = 3; 
+    moverPCalcular[0].endereco1 = 1; 
+    moverPCalcular[0].endereco2 = 0; // RAM[0] base -> reg1
+
+    moverPCalcular[1].opcode = 2; 
+    moverPCalcular[1].endereco1 = 1; 
+    moverPCalcular[1].endereco2 = 2; // reg1 -> RAM[2] 
+
+    moverPCalcular[2].opcode = -1;
+    maquina(RAM, moverPCalcular);
+    for(int i = 0; i < RAM[1] - 1; i++)
+    {
+        int rAtual = RAM[0]; //vai pegar o resultado da última multiplicação, antes de perder o valor
+        salvaUmValor(RAM, 0, 0);
+        programaMultiplica(RAM, rAtual, RAM[2]);
+    }
+    extraiRAM(RAM,2, &externoBase);
+    extraiRAM(RAM,1, &externoExpoente);
+    int resultado;
+    extraiRAM(RAM,0, &resultado);
+     
+    printf("Valor da operação %d ^ %d = %d",base, expoente,  resultado);
+     if(ramLocal)
+        liberaRAM(RAM);
+}

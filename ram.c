@@ -83,6 +83,7 @@ void salvaUmValor(int* RAM, int pos, int val) {
 }
 
 void salvaDoisValores(int* RAM, int pos1, int val1, int pos2, int val2) {
+
     Instrucao moveReg[5];
 
     moveReg[0].opcode = 4;
@@ -104,4 +105,27 @@ void salvaDoisValores(int* RAM, int pos1, int val1, int pos2, int val2) {
 
     moveReg[4].opcode = -1;
     maquina(RAM, moveReg);
+}
+
+void auxMovPotencia(int *RAM)
+{
+    Instrucao move2[5];
+    move2[0].opcode = 3;
+    move2[0].endereco1 = 1;
+    move2[0].endereco2 = 0;// RAM[0] -> reg1
+    
+    move2[1].opcode = 3;
+    move2[1].endereco1 = 2;
+    move2[1].endereco2 = 1;// RAM[2] -> reg2
+    
+    move2[2].opcode = 5;
+    move2[2].endereco1 = 1;// irá levar o reg1 para a posicao 3 do endereço 2 lá na máquina, que irá representar o expoente
+    move2[2].endereco2 = -1;
+
+    move2[3].opcode =5;
+    move2[3].endereco1 = 2;
+    move2[3].endereco2 = -1;
+
+    move2[4].opcode = -1; 
+    maquina(RAM, move2);
 }
