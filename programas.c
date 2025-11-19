@@ -604,6 +604,8 @@ void programaConverteBinario(int numeroDec) {
         printf("%d", bit);
     }
     printf(")_2\n");
+
+    liberaRAM(RAM);
 }
 
 void programaPotencia(int *RAM, int base, int expoente)
