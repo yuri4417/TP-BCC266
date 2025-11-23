@@ -9,16 +9,22 @@ int main () {
     // programaMultiplica(NULL, 5, 3);
     // programaDivisao(NULL, 30, 5);
 
-    // programaRaizQuad(NULL, 25);
+    // programaSQRT(NULL, 25);
     // programaPA(0, 2, 10);
     // programaPG(1, 2, 10);
     // programaTrianguloRet(3, 5);
     // programaConverteBinario(100000);
-    programaPotencia(NULL, 4, 2);
-    //void programaFatorial(NULL, 8);
-    //void programaFibonacci(NULL, 8);
-    //void programaMDC(NULL, int a, int b);
-    //void programaMultiplicaInterno(NULL, int x, int y, int destino);
-    //void programaMMC(NULL, int a, int b);
+    // programaCombSimples(10,2);
+    // programaArranjoSimples(10, 2);
+    // programaFormulaHeron(10, 11, 12);
+    programaConverteSegundos(3665);
+
+    // programaPotencia(NULL, 4, 2);
+    // programaFatorial(NULL, 8);
+    // programaFibonacci(NULL, 8);
+
+    // programaMDC(NULL, int a, int b);
+    // programaMultiplicaInterno(NULL, int x, int y, int destino);
+    // programaMMC(NULL, int a, int b);
     return 0;
 }

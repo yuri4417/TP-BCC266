@@ -40,6 +40,11 @@ void programaMultiplica(int * RAM, int multiplicando, int multiplicador) { // RE
         ramLocal = 1;
     }
 
+    if (multiplicador > multiplicando) {
+        int temp = multiplicador;
+        multiplicador = multiplicando;
+        multiplicando = temp;
+    }
     salvaUmValor(RAM, 0, 0);
     salvaUmValor(RAM, 1, multiplicando);
     // RAM = [0, multiplicando]
@@ -140,7 +145,9 @@ void programaDivisao(int *RAM, int dividendo, int divisor) { //RESULTADO = RAM[0
         liberaRAM(RAM);
 }
 
-void programaRaizQuad(int* RAM, int radicando) { //RESULTADO == RAM[0]
+
+
+void programaSQRT(int* RAM, int radicando) { //RESULTADO == RAM[0]
     int ramLocal = 0; 
     if (RAM == NULL) {
         RAM = criaRam_vazia(7);
@@ -481,7 +488,7 @@ void programaTrianguloRet(int catA, int catB) {
     int soma;
     extraiRAM(RAM, 9, &soma); 
 
-    programaRaizQuad(RAM, soma);
+    programaSQRT(RAM, soma);
 
     Instrucao moveResult[3];
     moveResult[0].opcode = 3;
@@ -549,7 +556,7 @@ void programaTrianguloRet(int catA, int catB) {
 void programaConverteBinario(int numeroDec) {
     int *RAM = criaRam_vazia(100);
 
-    // Esquema RAM -> [LIXO, LIXO, LIXO, LIXO, posPreencher, numeroDec, 1, LSB, ....]
+    // Esquema RAM -> [LIXO, LIXO, LIXO, LIXO, ptr, numeroDec, 1, LSB, ....]
 
     salvaDoisValores(RAM, 5, numeroDec, 6, 1);
     salvaUmValor(RAM, 4, 7); 
@@ -561,7 +568,7 @@ void programaConverteBinario(int numeroDec) {
 
     while (numero > 0) {
         programaDivisao(RAM, numero, 2);
-        //RAM -> [result, resto, LIXO, LIXO, posPreencher, numeroDec, 1, 0, ....]
+        //RAM -> [result, resto, LIXO, LIXO, ptr, numeroDec, 1, 0, ....]
 
         extraiRAM(RAM, 0, &numero); 
 
@@ -607,6 +614,209 @@ void programaConverteBinario(int numeroDec) {
 
     liberaRAM(RAM);
 }
+
+void programaArranjoSimples(int n, int k) {
+    
+    // [LIXO, LIXO, LIXO, LIXO, n, k, n!, (n-k)!]
+    int *RAM = criaRam_vazia(8);
+
+    salvaDoisValores(RAM, 4, n, 5, k);
+
+
+    int n_maq;
+    extraiRAM(RAM, 4, &n_maq);
+    programaFatorial(RAM, n_maq);
+
+    int nFat;
+    extraiRAM(RAM, 0, &nFat);
+    
+    salvaUmValor(RAM, 6, nFat);
+
+    Instrucao sub[2];
+    sub[0].opcode = 1;
+    sub[0].endereco1 = 4;
+    sub[0].endereco2 = 5;
+    sub[0].endereco3 = 0;
+
+    sub[1].opcode = -1;
+    maquina(RAM, sub);
+    int subResult;
+    extraiRAM(RAM, 0, &subResult);
+
+    programaFatorial(RAM, subResult);
+    int subFat;
+    extraiRAM(RAM, 0, &subFat);
+
+    programaDivisao(RAM, nFat, subFat);
+
+    int arranjo;
+    extraiRAM(RAM, 0, &arranjo);
+    printf("A(%d, %d) = %d\n", n, k, arranjo);
+
+    liberaRAM(RAM);
+}
+
+void programaCombSimples(int n, int k) {
+
+    //RAM -> [LIXO, LIXO, LIXO, LIXO, n, k, n!, k!, (n - k)!, resultado]
+    int *RAM = criaRam_vazia(10);
+
+    salvaDoisValores(RAM, 4, n, 5, k);
+
+    
+    int nFat;
+    programaFatorial(RAM, n);
+    extraiRAM(RAM, 0, &nFat);
+    
+    int kFat;
+    programaFatorial(RAM, k);
+    extraiRAM(RAM, 0, &kFat);
+
+    salvaDoisValores(RAM, 6, nFat, 7, kFat);
+
+    Instrucao sub[2];
+    sub[0].opcode = 1;
+    sub[0].endereco1 = 4;
+    sub[0].endereco2 = 5;
+    sub[0].endereco3 = 8;
+
+    sub[1].opcode = -1;
+    maquina(RAM, sub);
+    int result;
+    extraiRAM(RAM, 8, &result);
+
+    programaFatorial(RAM, result);
+
+
+    int nkFat;
+    extraiRAM(RAM, 0, &nkFat);
+
+    programaMultiplica(RAM, kFat, nkFat);
+
+    int fat;
+    extraiRAM(RAM, 0, &fat);
+
+    programaDivisao(RAM, nFat, fat);
+
+    int comb;
+    extraiRAM(RAM, 0, &comb);
+    printf("C(%d, %d) = %d\n", n, k, comb);
+
+    liberaRAM(RAM);
+}
+
+void programaFormulaHeron(int a, int b, int c) {
+
+    // [LIXO, LIXO, LIXO, LIXO, LIXO, LIXO, LIXO, LIXO, a, b, c, s]
+    int *RAM = criaRam_vazia(12);
+
+    salvaDoisValores(RAM, 8, a, 9, b);
+    salvaUmValor(RAM, 10, c);
+
+    Instrucao soma[2];
+    soma[0].opcode = 0; 
+    soma[0].endereco1 = 8; 
+    soma[0].endereco2 = 9; 
+    soma[0].endereco3 = 0; 
+    soma[1].opcode = -1;
+    maquina(RAM, soma);
+
+    Instrucao soma2[2];
+    soma2[0].opcode = 0; 
+    soma2[0].endereco1 = 0; 
+    soma2[0].endereco2 = 10; 
+    soma2[0].endereco3 = 0; 
+    soma2[1].opcode = -1;
+    maquina(RAM, soma2);
+
+    int perimetro;
+    extraiRAM(RAM, 0, &perimetro);
+    
+    programaDivisao(RAM, perimetro, 2);
+
+    Instrucao moveS[3];
+    moveS[0].opcode = 3; 
+    moveS[0].endereco1 = 1; 
+    moveS[0].endereco2 = 0; 
+    
+    moveS[1].opcode = 2; 
+    moveS[1].endereco1 = 1; 
+    moveS[1].endereco2 = 11; 
+    
+    moveS[2].opcode = -1;
+    maquina(RAM, moveS);
+
+    Instrucao sub[4];
+    
+    sub[0].opcode = 1; 
+    sub[0].endereco1 = 11; 
+    sub[0].endereco2 = 8;  
+    sub[0].endereco3 = 8;  
+
+    sub[1].opcode = 1;
+    sub[1].endereco1 = 11; 
+    sub[1].endereco2 = 9;  
+    sub[1].endereco3 = 9;  
+
+    sub[2].opcode = 1;
+    sub[2].endereco1 = 11; 
+    sub[2].endereco2 = 10; 
+    sub[2].endereco3 = 10; 
+
+    sub[3].opcode = -1;
+    maquina(RAM, sub);
+
+    int S, SA, SB, SC;
+    extraiRAM(RAM, 11, &S);
+    extraiRAM(RAM, 8, &SA);
+    extraiRAM(RAM, 9, &SB);
+    extraiRAM(RAM, 10, &SC);
+
+    programaMultiplica(RAM, S, SA);
+    extraiRAM(RAM, 0, &S);
+
+    programaMultiplica(RAM, S, SB);
+    extraiRAM(RAM, 0, &S);
+
+    programaMultiplica(RAM, S, SC);
+    extraiRAM(RAM, 0, &S);
+    
+    programaSQRT(RAM, S);
+
+    int area;
+    extraiRAM(RAM, 0, &area);
+    
+    printf("Área do triângulo (%d, %d, %d) = %d\n", a, b, c, area);
+
+    liberaRAM(RAM);
+}
+
+void programaConverteSegundos(int segundos) {
+
+    int *RAM = criaRam_vazia(4);
+
+    programaDivisao(RAM, segundos, 86400);
+    int dias;
+    extraiRAM(RAM, 0, &dias);
+    int resto1;
+    extraiRAM(RAM, 1, &resto1);
+
+    programaDivisao(RAM, resto1, 3600); 
+    int horas;
+    extraiRAM(RAM, 0, &horas);
+
+    int resto2;
+    extraiRAM(RAM, 1, &resto2);
+    programaDivisao(RAM, resto2, 60);
+    int minutos;
+    extraiRAM(RAM, 0, &minutos);
+    int segs;
+    extraiRAM(RAM, 1, &segs);
+    printf("Conversão de %d segundos = %d dias, %d horas, %d minutos e %d segundos\n", segundos, dias, horas, minutos, segs);
+
+    liberaRAM(RAM);
+}
+
 
 void programaPotencia(int *RAM, int base, int expoente)
 {
@@ -731,32 +941,17 @@ void programaFatorial(int *RAM, int n)
     }
 
     int resultado;
-    Instrucao move [ 3];
-    move[0].opcode = 3;
-    move[0].endereco1 = 1;
-    move[0].endereco2 =0;
-    
-    move[1].opcode = 5;
-    move[1].endereco1 = 1;
-    move[1].endereco2 = 0;
-
-    move[2].opcode = -1;
-    maquina(RAM, move);
     extraiRAM(RAM, 0, &resultado);
 
     
     printf("Fatorial: %d! = %d\n", externoN, resultado);
 
     if (ramLocal)
-
         liberaRAM(RAM);
 
 }
 
 void programaFibonacci(int *RAM, int n)
-
-
-
 {
     int ramLocal = 0;
     if (RAM == NULL) {
@@ -817,6 +1012,9 @@ void programaFibonacci(int *RAM, int n)
     if (ramLocal)
         liberaRAM(RAM);
 }
+
+
+
 
 void programaMDC(int *RAM, int a, int b) {
     int local = 0;
