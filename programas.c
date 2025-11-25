@@ -824,13 +824,14 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
     int INICIO_C = 100;
 
     int counter = 0;
-    salvaUmValor(RAM, 4, 0);
     for (int i = 0; i < N; i++) 
         for (int j = 0; j < N; j++) {
 
-            // pos ram = inicio + (I * n) + j
+            // inicio + (i * n) + j
 
             programaMultiplica(RAM, i, N);
+            int mult;
+            extraiRAM(RAM, 0, &mult);
             salvaUmValor(RAM, 1, j);
 
             Instrucao somaJ[2];
@@ -851,36 +852,10 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
             salvaUmValor(RAM, posMatA, matA[counter]);
 
 
-            salvaUmValor(RAM, 3, 1);
-            Instrucao somaCount[2];
-            somaCount[0].opcode = 0;
-            somaCount[0].endereco1 = 3;
-            somaCount[0].endereco2 = 4;
-            somaCount[0].endereco3 = 4;
+            // salva matB
 
-            somaCount[1].opcode = -1;
-            maquina(RAM, somaCount);
-            extraiRAM(RAM, 4, &counter);
-        }
-    
 
-    salvaUmValor(RAM, 4, 0);
-    extraiRAM(RAM, 4, &counter);
-    for (int i = 0; i < N; i++) 
-        for (int j = 0; j < N; j++) {
-
-            // pos ram = inicio + (I * n) + j
-
-            programaMultiplica(RAM, i, N);
-            salvaUmValor(RAM, 1, j);
-
-            Instrucao somaJ[2];
-            somaJ[0].opcode = 0;
-            somaJ[0].endereco1 = 0;
-            somaJ[0].endereco2 = 1;
-            somaJ[0].endereco3 = 0;
-            
-            somaJ[1].opcode = -1;
+            salvaDoisValores(RAM, 0, mult, 1, j);
             maquina(RAM, somaJ);
 
             salvaUmValor(RAM, 1, INICIO_B);
@@ -903,14 +878,15 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
             maquina(RAM, somaCount);
             extraiRAM(RAM, 4, &counter);
         }
-    
 
     //Calculo
 
     for (int i = 0; i < N; i++) 
         for (int j = 0; j < N; j++) {
 
-            // pos ram = inicio + (i * n) + j
+            //C_i,j = Som(A_i,k * B_k,j) 
+
+            // inicio + (i * n) + j
             programaMultiplica(RAM, i, N);
             salvaUmValor(RAM, 1, j);
 
@@ -937,7 +913,7 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
                 programaMultiplica(RAM, i, N);
                 salvaUmValor(RAM, 1, k);
 
-                // INICIO_A + (i * N) + k
+                // inicio + (i * N) + k
                 Instrucao somaK[2];
                 somaK[0].opcode = 0;
                 somaK[0].endereco1 = 0;
@@ -954,7 +930,7 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
                 extraiRAM(RAM, 0, &posA);
 
 
-                // inicios + (k * N) + j
+                // inicio + (k * N) + j
                 programaMultiplica(RAM, k, N);
                 salvaUmValor(RAM, 1, j);
 
