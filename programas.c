@@ -65,7 +65,7 @@ void programaMultiplica(int * RAM, int multiplicando, int multiplicador) { // RE
 
     int result;
     extraiRAM(RAM, 0, &result);
-    printf("MULT: %d x %d = %d\n", multiplicando, multiplicador, result);
+    //printf("MULT: %d x %d = %d\n", multiplicando, multiplicador, result);
     
 
     // printRam(RAM, 2);

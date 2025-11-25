@@ -25,7 +25,7 @@ void maquina(int *ram, Instrucao *programa) {
                 reg2 = load(ram, inst->endereco2);
                 reg1 += reg2;
                 store(ram, inst->endereco3, reg1);
-                printf("SUM: Resultado %d salvo no endereço %d\n", reg1, inst->endereco3);
+                //printf("SUM: Resultado %d salvo no endereço %d\n", reg1, inst->endereco3);
                 break;
 
             case 1: //[OP, end1, end2, endSalvar]
@@ -33,7 +33,7 @@ void maquina(int *ram, Instrucao *programa) {
                 reg2 = load(ram, inst->endereco2);
                 reg1 -= reg2;
                 store(ram, inst->endereco3, reg1);
-                printf("SUB: Resultado %d salvo no endereço %d\n", reg1, inst->endereco3);
+                //printf("SUB: Resultado %d salvo no endereço %d\n", reg1, inst->endereco3);
                 break;
 
             case 2: //[OP, regFonte, posRam, -1]

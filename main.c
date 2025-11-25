@@ -19,6 +19,9 @@ int main () {
     // programaFormulaHeron(10, 11, 12);
     //programaConverteSegundos(3665);
 
+    int matA[] ={1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int matB[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    programaMultiplicaMatrizes(matA, matB, 3);
     //programaPotencia(NULL, -2, 3);
     //programaFatorial(NULL, 12);
     //programaFibonacci(NULL, 8);
