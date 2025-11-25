@@ -16,6 +16,7 @@ void programaArranjoSimples(int n, int k);
 void programaCombSimples(int n, int k);
 void programaFormulaHeron(int a, int b, int c);
 void programaConverteSegundos(int segundos);
+void programaMultiplicaMatrizes(int *matA, int *matB, int N);
 
 void programaPotencia(int *RAM, int base, int expoente);
 void programaFatorial(int *RAM, int n);

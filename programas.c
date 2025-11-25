@@ -815,6 +815,211 @@ void programaConverteSegundos(int segundos) {
     liberaRAM(RAM);
 }
 
+void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
+
+    int *RAM = criaRam_vazia(200);
+
+    int INICIO_A = 20;
+    int INICIO_B = 60;
+    int INICIO_C = 100;
+
+    int counter = 0;
+    salvaUmValor(RAM, 4, 0);
+    for (int i = 0; i < N; i++) 
+        for (int j = 0; j < N; j++) {
+
+            // pos ram = inicio + (I * n) + j
+
+            programaMultiplica(RAM, i, N);
+            salvaUmValor(RAM, 1, j);
+
+            Instrucao somaJ[2];
+            somaJ[0].opcode = 0;
+            somaJ[0].endereco1 = 0;
+            somaJ[0].endereco2 = 1;
+            somaJ[0].endereco3 = 0;
+            
+            somaJ[1].opcode = -1;
+            maquina(RAM, somaJ);
+
+            salvaUmValor(RAM, 1, INICIO_A);
+            maquina(RAM, somaJ);
+
+            int posMatA;
+            extraiRAM(RAM, 0, &posMatA);
+
+            salvaUmValor(RAM, posMatA, matA[counter]);
+
+
+            salvaUmValor(RAM, 3, 1);
+            Instrucao somaCount[2];
+            somaCount[0].opcode = 0;
+            somaCount[0].endereco1 = 3;
+            somaCount[0].endereco2 = 4;
+            somaCount[0].endereco3 = 4;
+
+            somaCount[1].opcode = -1;
+            maquina(RAM, somaCount);
+            extraiRAM(RAM, 4, &counter);
+        }
+    
+
+    salvaUmValor(RAM, 4, 0);
+    extraiRAM(RAM, 4, &counter);
+    for (int i = 0; i < N; i++) 
+        for (int j = 0; j < N; j++) {
+
+            // pos ram = inicio + (I * n) + j
+
+            programaMultiplica(RAM, i, N);
+            salvaUmValor(RAM, 1, j);
+
+            Instrucao somaJ[2];
+            somaJ[0].opcode = 0;
+            somaJ[0].endereco1 = 0;
+            somaJ[0].endereco2 = 1;
+            somaJ[0].endereco3 = 0;
+            
+            somaJ[1].opcode = -1;
+            maquina(RAM, somaJ);
+
+            salvaUmValor(RAM, 1, INICIO_B);
+            maquina(RAM, somaJ);
+
+            int posMatB;
+            extraiRAM(RAM, 0, &posMatB);
+
+            salvaUmValor(RAM, posMatB, matB[counter]);
+
+
+            salvaUmValor(RAM, 3, 1);
+            Instrucao somaCount[2];
+            somaCount[0].opcode = 0;
+            somaCount[0].endereco1 = 3;
+            somaCount[0].endereco2 = 4;
+            somaCount[0].endereco3 = 4;
+
+            somaCount[1].opcode = -1;
+            maquina(RAM, somaCount);
+            extraiRAM(RAM, 4, &counter);
+        }
+    
+
+    //Calculo
+
+    for (int i = 0; i < N; i++) 
+        for (int j = 0; j < N; j++) {
+
+            // pos ram = inicio + (i * n) + j
+            programaMultiplica(RAM, i, N);
+            salvaUmValor(RAM, 1, j);
+
+
+            Instrucao somaJ[2];
+            somaJ[0].opcode = 0;
+            somaJ[0].endereco1 = 0;
+            somaJ[0].endereco2 = 1;
+            somaJ[0].endereco3 = 0;
+            
+            somaJ[1].opcode = -1;
+            maquina(RAM, somaJ);
+
+            salvaUmValor(RAM, 1, INICIO_C);
+            maquina(RAM, somaJ);
+
+            int posMatC;
+            extraiRAM(RAM, 0, &posMatC);
+
+            salvaUmValor(RAM, posMatC, 0);
+
+            for (int k = 0; k < N; k++) {
+
+                programaMultiplica(RAM, i, N);
+                salvaUmValor(RAM, 1, k);
+
+                // INICIO_A + (i * N) + k
+                Instrucao somaK[2];
+                somaK[0].opcode = 0;
+                somaK[0].endereco1 = 0;
+                somaK[0].endereco2 = 1;
+                somaK[0].endereco3 = 0;
+                
+                somaK[1].opcode = -1;
+                maquina(RAM, somaK);
+
+                salvaUmValor(RAM, 1, INICIO_A);
+                maquina(RAM, somaK);
+
+                int posA;
+                extraiRAM(RAM, 0, &posA);
+
+
+                // inicios + (k * N) + j
+                programaMultiplica(RAM, k, N);
+                salvaUmValor(RAM, 1, j);
+
+                maquina(RAM, somaK);
+
+                salvaUmValor(RAM, 1, INICIO_B);
+                maquina(RAM, somaK);
+
+                int posB;
+                extraiRAM(RAM, 0, &posB);
+
+                int celA, celB;
+                extraiRAM(RAM, posA, &celA);
+                extraiRAM(RAM, posB, &celB);
+
+                programaMultiplica(RAM, celA, celB);
+
+                Instrucao somaCel[2];
+                somaCel[0].opcode = 0;
+                somaCel[0].endereco1 = 0;
+                somaCel[0].endereco2 = posMatC;
+                somaCel[0].endereco3 = posMatC;
+
+                somaCel[1].opcode = -1;
+                maquina(RAM, somaCel);
+
+            }
+        }
+    
+    printf("MAT A x B:\n");
+    for (int i = 0; i < N; i++)  {
+        for (int j = 0; j < N; j++) {
+            //inicio + (i * N) + j
+
+            programaMultiplica(RAM, i, N);
+            salvaUmValor(RAM, 1, j);
+
+            Instrucao somaJ[2];
+            somaJ[0].opcode = 0;
+            somaJ[0].endereco1 = 0;
+            somaJ[0].endereco2 = 1;
+            somaJ[0].endereco3 = 0;
+
+            somaJ[1].opcode = -1;
+            maquina(RAM, somaJ);
+
+            salvaUmValor(RAM, 1, INICIO_C);
+
+            maquina(RAM, somaJ);
+
+            int posC;
+            extraiRAM(RAM, 0, &posC);
+
+            int celC;
+            extraiRAM(RAM, posC, &celC);
+
+            printf("%d ", celC);
+        }
+        printf("\n");
+    }
+    liberaRAM(RAM);
+}
+
+
+
 void programaPotencia(int *RAM, int base, int expoente)//RESULTADO RAM[0]
 {
     int ramLocal = 0;
@@ -1180,6 +1385,8 @@ void programaSomatorio(int *RAM, int indiceInicial, int nTermos, int valorInicia
         RAM = NULL;
     }
 }
+
+
 
 void programaMDC(int *RAM, int a, int b) {
     int local = 0;
