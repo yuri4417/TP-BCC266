@@ -23,7 +23,7 @@ int main () {
     // programaMultiplicaMatrizes(matA, matB, 3);
 
     
-    //programaPotencia(NULL, -2, 3);
+    //programaPotencia(NULL, -2, 2);
     //programaFatorial(NULL, 12);
     //programaFibonacci(NULL, 8);
     //programaValorAbsoluto(NULL, -1000 );

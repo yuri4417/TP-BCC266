@@ -995,27 +995,24 @@ void programaMultiplicaMatrizes(int *matA, int *matB, int N) {
 }
 
 
-
-void programaPotencia(int *RAM, int base, int expoente)//RESULTADO RAM[0]
+void programaPotencia(int *RAM, int base, int expoente) // RESULTADO RAM[0]
 {
     int ramLocal = 0;
     if (RAM == NULL) {
         ramLocal = 1;
         RAM = criaRam_vazia(5);
-        
     }
+    
     salvaDoisValores(RAM, 1, base, 2 , expoente);
 
     int externoBase, externoExpoente;
 
-    extraiRAM(RAM,1, &externoBase);
-
-    extraiRAM(RAM,2, &externoExpoente);
-    int basePositiva;
+    extraiRAM(RAM, 1, &externoBase);
+    extraiRAM(RAM, 2, &externoExpoente);
     
+    int basePositiva;
     if (externoBase == 0) {
-
-        if (externoExpoente <0) 
+        if (externoExpoente < 0) 
             printf("Erro: %d ^ %d Divisao por zero\n", externoBase, externoExpoente); 
         else if (externoExpoente == 0) 
             printf("Erro: %d ^ %d Resultado indeterminado\n", externoBase, externoExpoente); 
@@ -1028,24 +1025,20 @@ void programaPotencia(int *RAM, int base, int expoente)//RESULTADO RAM[0]
     }
 
     if (externoExpoente == 0) {
-
         printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
-        if (ramLocal) 
-            liberaRAM(RAM);
+        if (ramLocal) liberaRAM(RAM);
         return;
     }
 
     if (externoBase == 1) {
-
         printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
-        if (ramLocal) 
-            liberaRAM(RAM);
+        if (ramLocal) liberaRAM(RAM);
         return;
     }
 
     if (externoBase == -1) {
-
-        if (RAM[2] % 2 == 0) 
+        programaDivisao(RAM, RAM[2], 2);
+        if (RAM[1] == 0) 
             printf("%d ^ %d = %d\n", externoBase, externoExpoente, 1);
         else 
             printf("%d ^ %d = %d\n", externoBase, externoExpoente, -1); 
@@ -1055,51 +1048,63 @@ void programaPotencia(int *RAM, int base, int expoente)//RESULTADO RAM[0]
     }
 
     if (externoExpoente < 0) {
-
         printf("%d ^ %d = %d\n", externoBase, externoExpoente, 0);
-        if (ramLocal) 
-            liberaRAM(RAM);
+        if (ramLocal) liberaRAM(RAM);
         return;
     }
     programaValorAbsoluto(RAM, externoBase);
-    extraiRAM(RAM, 0,&basePositiva);
+    extraiRAM(RAM, 0, &basePositiva);
     
     salvaUmValor(RAM, 0, basePositiva);
 
     salvaDoisValores(RAM, 1, externoBase, 2, externoExpoente);
     salvaUmValor(RAM, 3, externoBase);
-
+    int rAtual;
     for(int i = 0; i < externoExpoente - 1; i++)
     {
-        int rAtual = RAM[0]; //vai pegar o resultado da última multiplicação, antes de perder o valor
+        extraiRAM(RAM, 0, &rAtual);
+        salvaUmValor(RAM, 0, 0); 
+        
         programaMultiplica(RAM, rAtual, basePositiva);
     }
-    extraiRAM(RAM,2, &externoExpoente);
+    
+    extraiRAM(RAM, 2, &externoExpoente);
 
     int resultado;
+    extraiRAM(RAM, 0, &resultado);
+
+    salvaUmValor(RAM, 4, resultado); 
+    programaDivisao(RAM, externoExpoente, 2); 
+    int resto; 
+
+    extraiRAM(RAM, 1, &resto); 
     
-    extraiRAM(RAM,0, &resultado);
+    printf("Resto da divisao do expoente: %d\n\n", resto);
 
-    salvaUmValor(RAM, 4, resultado);
-
-    if (externoBase < 0 && (externoExpoente % 2 != 0)) {
+    if (externoBase < 0 && resto != 0) {
         
-        extraiRAM(RAM, 0, &resultado);
+        extraiRAM(RAM, 4, &resultado); 
+        
+        // Zera RAM[0] para calcular o dobro corretamente
+        salvaUmValor(RAM, 0, 0);
         programaMultiplica(RAM, resultado, 2);
+        
         Instrucao sub[2];
-
         sub[0].opcode = 1;
-        sub[0].endereco1 = 4;
-        sub[0].endereco2 = 0;
-        sub[0].endereco3 = 0;
+        sub[0].endereco1 = 4; // X
+        sub[0].endereco2 = 0; // 2X
+        sub[0].endereco3 = 0; // Resultado: X - 2X = -X
 
         sub[1].opcode = -1;
         maquina(RAM, sub);
-        extraiRAM(RAM, 0, &resultado);
         
+        extraiRAM(RAM, 0, &resultado); // Atualiza a variável com o valor negativo
     }
-    printf("\nValor da potência  %d ^ %d = %d\n\n",externoBase, externoExpoente,  resultado);
-     if(ramLocal)
+    
+
+    printf("\nValor da potência  %d ^ %d = %d\n\n", externoBase, externoExpoente, resultado);
+    
+    if(ramLocal)
         liberaRAM(RAM);
 }
 
