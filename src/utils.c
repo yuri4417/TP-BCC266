@@ -9,6 +9,7 @@
 #include "structs.h"
 #include "MMU.h"
 #include "cores.h"
+#include "pilha.h"
 
 Instrucao* criarPadrao(int N_FOR, int N_OPCODE, int INICIO_RAM, int rangeMemoria, int N_WORD) {
     Instrucao* ptr = (Instrucao*) malloc(N_FOR * sizeof(Instrucao));
@@ -160,13 +161,10 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
 
 void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     Cache *L1 = criaCache(metrics->tamL1); Cache *L2 = criaCache(metrics->tamL2); Cache *L3 = criaCache(metrics->tamL3);
-    LinhaCache *RAM = criaRAM_aleatoria(metrics->tamRAM);
+    LinhaCache *RAM = (configs[ID_INTERRUPCAO].ativo) ? criaRAM(metrics->tamRAM) : criaRAM_aleatoria(metrics->tamRAM);
  
-    Instrucao *programa;
-    if (configs[ID_MULT].ativo)
-        programa = geradorMultiplo(10000, metrics->N_PROB, metrics->N_FOR, 2, 4);
-    else
-        programa = gerarInstrucoes(10000, metrics->tamRAM, metrics->N_PROB, metrics->N_FOR, 2, 4);
+    Instrucao *programa = (configs[ID_MULT].ativo) ? geradorMultiplo(10000, metrics->N_PROB, metrics->N_FOR, 2, 4) : 
+                gerarInstrucoes(10000, metrics->tamRAM, metrics->N_PROB, metrics->N_FOR, 2, 4);
 
 
     WriteBuffer buffer;
@@ -191,10 +189,22 @@ void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     else
         strcpy(metrics->policy, "LRU");
 
-    // inicializar programa interrupcao
-    // iniciar pilha de execução
-    // colocar programa principal na pilha
-    cpu(L1, L2, L3, RAM, programa, &metrics->relogio, &buffer, configs);
+    Instrucao *TI = NULL;
+    if (configs[ID_INTERRUPCAO].ativo) {
+        FILE *pFile = fopen("TI.txt", "r");
+        int i = 0;
+        while (!feof(pFile)) {
+            fscanf(pFile, "%d %d %d %d %d %d %d", &TI[i].opcode, &TI[i].add1.endBloco, &TI[i].add1.endPalavra, 
+                &TI[i].add2.endBloco, &TI[i].add2.endPalavra, &TI[i].add3.endBloco, &TI[i].add3.endPalavra);
+            i++;
+        }
+        fclose(pFile);
+    }
+
+    PilhaExecucao *pPilha = criaPilha(metrics->qtdInterrupcao);
+    PilhaPush(pPilha, (ItemPilha){programa, 0});
+
+    cpu(L1, L2, L3, RAM, &metrics, &buffer, configs, pPilha, TI);
 
 
     metrics->hitsL1 = L1->hit; metrics->missesL1 = L1->miss;
@@ -205,9 +215,12 @@ void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
 
     destroiCache(L1); destroiCache(L2); destroiCache(L3); 
     liberaRAM(RAM);
+    destroiPilha(pPilha);
     free(programa);
     if (configs[ID_BUFFER].ativo)
         free(buffer.fila);
+    if (configs[ID_INTERRUPCAO].ativo)
+        free(TI);
 }
 
 /*

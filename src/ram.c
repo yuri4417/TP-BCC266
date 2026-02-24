@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+LinhaCache* criaRAM(int tamanho) {
+    LinhaCache *ptr = (LinhaCache*) calloc(tamanho, sizeof(LinhaCache));
+    return ptr;
+}
  
 LinhaCache* criaRAM_aleatoria(int tamanho) {
     LinhaCache *ptr = (LinhaCache*) malloc(sizeof(LinhaCache) * tamanho);

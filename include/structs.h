@@ -35,9 +35,10 @@ typedef struct {
     int hitsL1, missesL1;
     int hitsL2, missesL2;
     int hitsL3, missesL3;
-    int hitsRam, missesRam;
+    int hitsRAM, missesRAM;
     char policy[5];
 
+    int qtdInterrupcao;
     int PROB_INTERRUPCAO;
     int N_PROB;
     int N_FOR;
