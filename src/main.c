@@ -7,6 +7,8 @@
 #include "structs.h"
 #include "cores.h"
 #include "tabela.h"
+#include "disco.h"
+#include "utils.h"
 
 int main() {
     srand(time(NULL));
@@ -25,6 +27,10 @@ int main() {
     int rodando = 1;
     char *opcoes_principal[] = {"Benchmark Unico", "Configuracoes", "Tabelas", "Sair"};
     int qtdSalva = 0;
+
+    // if(!criaHd())
+    //     return -1;
+
     while(rodando) {
         system("clear");
         int escolha = menu_run(opcoes_principal, 4, "CacheBenchmark - BCC 266");
@@ -34,12 +40,18 @@ int main() {
                 BenchMetrics m;
                 setupBenchmark(&m, configs);
                 CacheBenchmark(&m, configs);
+                printf("\n" BOLD(YELLOW("--- FIM DA SIMULACAO ---")) "\n");
+                printf("Pressione ENTER para visualizar o relatorio final...");
+                int c;
+                while ((c = getchar()) != '\n' && c != EOF);
+
+                
                 exibirRelatorioIndividual(&m,configs);
                 salvaTabela(&qtdSalva, tabela, m);
                 //testeRapido(configs);
                 break;
             case 2: // configs
-                menu_checkbox(configs, 6, "Configuracoes");
+                menu_checkbox(configs, 7, "Configuracoes");
                 break;
             case 3: // Bancada Padrão
                 char *opcoesSubMenu []= {"Tabelas Locais", "Tabelas Padrao (M1 - M5)"};

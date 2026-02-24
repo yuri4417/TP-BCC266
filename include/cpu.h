@@ -5,7 +5,7 @@
 
 
 void cpu(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, BenchMetrics *metrics, WriteBuffer *buffer, 
-        ConfigItem *configs, PilhaExecucao *pPilha, Instrucao *TI);
+        ConfigItem *configs, PilhaExecucao *pPilha, Instrucao *TI,int *hitsRam, int *missesRam);
 
 
 

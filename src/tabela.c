@@ -16,8 +16,8 @@
 #define H12 TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
 #define H20 TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
 #define QTD_TESTES 20
-//120 caracteres
-#define H120 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12
+//132 caracteres
+#define H132 H12 H12 H12 H12 H12 H12 H12 H12 H12
 
 
 int selecionarProbabilidade();
@@ -28,10 +28,10 @@ void inicializarMetricas(BenchMetrics *m);
 void exibirInfoGeral(BenchMetrics *m, ConfigItem *configs) { // informações se a o writebuffer, lip estão ativos, numero de instruções, tamanho do for
     
     printf("\n");
-    printf(TAB_TL H120 TAB_TR "\n");
-    printf(TAB_VER " Resumo da execucao:%100s" TAB_VER "\n", ""); 
-    printf(TAB_ML H120 TAB_MR "\n");
-    printf(TAB_VER " %-18s%-10d KB %87s" TAB_VER "\n", "RAM Total:", m->tamRAM, "");
+    printf(TAB_TL H132 TAB_TR "\n");
+    printf(TAB_VER " Resumo da execucao:%112s" TAB_VER "\n", ""); 
+    printf(TAB_ML H132 TAB_MR "\n");
+    printf(TAB_VER " %-18s%-10d KB %99s" TAB_VER "\n", "RAM Total:", TAM_RAM_DEFAULT, "");
     
     if (configs[ID_BUFFER].ativo) {
         printf(TAB_VER " %-18s%s%94s" TAB_VER "\n", "Write Buffer:", GREEN("ATIVADO"), "");
@@ -40,12 +40,12 @@ void exibirInfoGeral(BenchMetrics *m, ConfigItem *configs) { // informações se
     }
     
     if(configs[POL_RRIP].ativo)
-        printf(TAB_VER " Politica %s%-4s%s%94s" TAB_VER "\n", m->policy,":",  GREEN("ATIVADO"), "");
+        printf(TAB_VER " Politica %s%-4s%s%106s" TAB_VER "\n", m->policy,":",  GREEN("ATIVADO"), "");
     else    
-        printf(TAB_VER " Politica %s%-6s%s%94s" TAB_VER "\n", m->policy,":",  GREEN("ATIVADO"), "");
-    printf(TAB_VER " %-18s%-3d %% %95s" TAB_VER "\n", "Prob. Repeticao:", m->N_PROB, "");
-    printf(TAB_VER " %-18s%-10d%91s" TAB_VER "\n", "Instr. p/ Loop:", m->N_FOR, "");
-    printf(TAB_BL H120 TAB_BR "\n\n");
+        printf(TAB_VER " Politica %s%-6s%s%106s" TAB_VER "\n", m->policy,":",  GREEN("ATIVADO"), "");
+    printf(TAB_VER " %-18s%-3d %% %107s" TAB_VER "\n", "Prob. Repeticao:", m->N_PROB, "");
+    printf(TAB_VER " %-18s%-10d%103s" TAB_VER "\n", "Instr. p/ Loop:", m->N_FOR, "");
+    printf(TAB_BL H132 TAB_BR "\n\n");
 }
 
 void cabecalho() {
@@ -59,7 +59,7 @@ void cabecalho() {
     printf(TAB_VER "    H.L1    " TAB_VER "   Hit L1%%  " TAB_VER "    M.L1    ");
     printf(TAB_VER "    H.L2    " TAB_VER "   Hit L2%%  " TAB_VER "    M.L2    ");
     printf(TAB_VER "    H.L3    " TAB_VER "   Hit L3%%  " TAB_VER "    M.L3    ");
-    printf(TAB_VER "    RAM%%    " TAB_VER "        TEMPO       " TAB_VER "\n");
+    printf(TAB_VER "    RAM%%    " TAB_VER "    DISCO%%    " TAB_VER "        TEMPO       " TAB_VER "\n");
 
     printf(TAB_ML H3 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6);
     printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
@@ -76,8 +76,9 @@ void imprimirLinha(int id, BenchMetrics *m) { // vai imprimir os dados de cada c
     float pL2 = tL2 ? (float)m->hitsL2 * 100.0 / totalAcessos : 0.0;
     long tL3 = m->hitsL3 + m->missesL3;
     float pL3 = tL3 ? (float)m->hitsL3 * 100.0 / totalAcessos : 0.0;
-    
-    float taxaRAM = totalAcessos ? ((float)m->missesL3 / totalAcessos) * 100.0 : 0.0;
+    long tRAM = m->hitsRAM + m->missesRAM;
+    float pRAM =  tRAM ? (float)m->hitsRAM*100.0 / totalAcessos : 0.0; 
+    float taxaRAM = totalAcessos ? ((float)m->missesRAM / totalAcessos) * 100.0 : 0.0;
 
     printf(TAB_VER " M%-d" TAB_VER " %-4d " TAB_VER " %-4d " TAB_VER " %-4d ",id, m->tamL1, m->tamL2, m->tamL3);
     printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ",m->hitsL1, pL1, m->missesL1);
@@ -112,7 +113,6 @@ void testePadrao(ConfigItem *configs) { // vai inicializar o tamanho das caches 
     BenchMetrics totalizador;
     inicializarMetricas(&totalizador);
 
-    totalizador.tamRAM = TAM_RAM_DEFAULT; 
     totalizador.N_PROB = prob; 
     totalizador.N_FOR = nFor;
 
@@ -123,7 +123,6 @@ void testePadrao(ConfigItem *configs) { // vai inicializar o tamanho das caches 
         r->tamL1 = maquinas[i][0]; 
         r->tamL2 = maquinas[i][1]; 
         r->tamL3 = maquinas[i][2];
-        r->tamRAM = TAM_RAM_DEFAULT; 
         r->N_PROB = prob; 
         r->N_FOR = nFor;
         r->tamWriteBuffer = configs[ID_BUFFER].ativo ? 4 : -1;
@@ -200,7 +199,6 @@ void inicializarMetricas(BenchMetrics *m) { // para evitar lixo de memória
     m->relogio = 0;
     m->N_PROB = 0; 
     m->N_FOR = 0;
-    m->tamRAM = 0;
 }
 
 int selecionarProbabilidade() { // leitura da probabilidade

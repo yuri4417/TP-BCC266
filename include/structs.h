@@ -7,12 +7,13 @@
 
 
 #define TAM_RAM_DEFAULT 1000
+#define TAM_HD_DEFAULT 10000
 //Custos hipoteticos conforme a hierarquia 
 #define CUSTO_L1 10
 #define CUSTO_L2 30
 #define CUSTO_L3 100
 #define CUSTO_RAM 600
-#define CUSTO_
+#define CUSTO_HD 10000
 
 #define POL_LRU 0
 #define POL_LIP 1
@@ -26,12 +27,12 @@
 #define ID_MULT 4
 #define ID_INTERRUPCAO 5
 
-
+#define nomeHD "HD.bin"
 
 typedef struct { 
     long int relogio;
     long qtdStalls;
-    int tamL1, tamL2, tamL3, tamRAM, tamWriteBuffer;
+    int tamL1, tamL2, tamL3,tamWriteBuffer;
     int hitsL1, missesL1;
     int hitsL2, missesL2;
     int hitsL3, missesL3;

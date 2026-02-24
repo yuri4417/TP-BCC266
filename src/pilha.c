@@ -2,6 +2,7 @@
 #include "pilha.h"
 #include "structs.h"
 
+#include <stdlib.h>
 
 
 PilhaExecucao *criaPilha(int maxTam) {
@@ -26,7 +27,7 @@ void destroiPilha(PilhaExecucao *pilha) {
 }
 
 void PilhaPush(PilhaExecucao *pilha, ItemPilha item) {
-    if (!pilha)
+    if (!pilha || !pilha->itens)
         return;
 
     if (pilha->qtd < pilha->maxTam) 
