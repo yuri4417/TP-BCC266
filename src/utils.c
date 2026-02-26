@@ -125,6 +125,8 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
 }
 
 void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
+    metrics->hitsRAM = 0;
+    metrics->missesRAM = 0;
     endwin();
     Cache *L1 = criaCache(metrics->tamL1); Cache *L2 = criaCache(metrics->tamL2); Cache *L3 = criaCache(metrics->tamL3); 
     LinhaCache *RAM = (configs[ID_INTERRUPCAO].ativo) ? criaRAM(TAM_RAM_DEFAULT) : criaRAM_aleatoria(TAM_RAM_DEFAULT);

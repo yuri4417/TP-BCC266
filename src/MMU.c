@@ -357,6 +357,7 @@ int moveL1(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, Write
     // HD -> RAM -> L3 -> L2 -> L1
     // *relogio += CUSTO_HD;
     (*missesRam)++;
+    *relogio += CUSTO_HD;
     int posRAM = transfereHD(RAM, add.endBloco, relogio, configs);
     if (posRAM != -1) {
         int novoposL3 = carregaRAM(L3, add.endBloco, RAM, buffer, configs, relogio);

@@ -40,12 +40,14 @@ int main() {
                 BenchMetrics m;
                 setupBenchmark(&m, configs);
                 CacheBenchmark(&m, configs);
-                printf("\n" BOLD(YELLOW("--- FIM DA SIMULACAO ---")) "\n");
-                printf("Pressione ENTER para visualizar o relatorio final...");
-                int c;
-                while ((c = getchar()) != '\n' && c != EOF);
+                if(configs[ID_INTERRUPCAO].ativo)
+                {
+                    printf("\n" BOLD(YELLOW("--- FIM DA SIMULACAO ---")) "\n");
+                    printf("Pressione ENTER para visualizar o relatorio final...");
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
 
-                
+                }
                 exibirRelatorioIndividual(&m,configs);
                 salvaTabela(&qtdSalva, tabela, m);
                 //testeRapido(configs);
