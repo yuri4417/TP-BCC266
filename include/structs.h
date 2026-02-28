@@ -7,7 +7,7 @@
 
 
 #define TAM_RAM_DEFAULT 1000
-#define TAM_HD_DEFAULT 10000
+#define TAM_HD_DEFAULT 50000
 //Custos hipoteticos conforme a hierarquia 
 #define CUSTO_L1 10
 #define CUSTO_L2 30
@@ -43,6 +43,9 @@ typedef struct {
     int PROB_INTERRUPCAO;
     int N_PROB;
     int N_FOR;
+
+
+    double tempoHD;
 } BenchMetrics;
 
 typedef struct {

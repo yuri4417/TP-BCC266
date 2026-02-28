@@ -115,7 +115,8 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
         metrics->tamWriteBuffer = menu_valor("Tamanho do WriteBuffer");
 
     metrics->relogio = 0;
-
+    metrics->hitsRAM = 0;
+    metrics->missesRAM = 0;
     if (configs[ID_INTERRUPCAO].ativo) {
         metrics->PROB_INTERRUPCAO = menu_valor("Probabilidade de Interrupcao");
         metrics->qtdInterrupcao = menu_valor("Tamanho do Programa de Interrupcao");
@@ -125,8 +126,6 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
 }
 
 void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
-    metrics->hitsRAM = 0;
-    metrics->missesRAM = 0;
     endwin();
     Cache *L1 = criaCache(metrics->tamL1); Cache *L2 = criaCache(metrics->tamL2); Cache *L3 = criaCache(metrics->tamL3); 
     LinhaCache *RAM = (configs[ID_INTERRUPCAO].ativo) ? criaRAM(TAM_RAM_DEFAULT) : criaRAM_aleatoria(TAM_RAM_DEFAULT);

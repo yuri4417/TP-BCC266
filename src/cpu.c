@@ -37,20 +37,20 @@ void cpu(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, BenchMetrics *metrics
                         return;
                     }
                 } else 
-                    return;
+                    return; 
                 break;
             case 0:
-                reg1 = MMU_Read(atual.add1, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam);
-                reg2 = MMU_Read(atual.add2, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam);
+                reg1 = MMU_Read(atual.add1, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
+                reg2 = MMU_Read(atual.add2, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
                 reg3.palavras[atual.add3.endPalavra] = reg1.palavras[atual.add1.endPalavra] + reg2.palavras[atual.add2.endPalavra];
-                MMU_Write(L1, L2, L3, RAM, buffer, atual.add3, reg3.palavras[atual.add3.endPalavra], &metrics->relogio, configs, hitsRam, missesRam);
+                MMU_Write(L1, L2, L3, RAM, buffer, atual.add3, reg3.palavras[atual.add3.endPalavra], &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
                 PC++;
                 break;
             case 1:
-                reg1 = MMU_Read(atual.add1, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam);
-                reg2 = MMU_Read(atual.add2, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam);
+                reg1 = MMU_Read(atual.add1, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
+                reg2 = MMU_Read(atual.add2, L1, L2, L3, RAM, buffer, &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
                 reg3.palavras[atual.add3.endPalavra] = reg1.palavras[atual.add1.endPalavra] - reg2.palavras[atual.add2.endPalavra];
-                MMU_Write(L1, L2, L3, RAM, buffer, atual.add3, reg3.palavras[atual.add3.endPalavra], &metrics->relogio, configs, hitsRam, missesRam);
+                MMU_Write(L1, L2, L3, RAM, buffer, atual.add3, reg3.palavras[atual.add3.endPalavra], &metrics->relogio, configs, hitsRam, missesRam, &metrics->tempoHD);
                 PC++;
                 break;
             case 2:
@@ -58,7 +58,7 @@ void cpu(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, BenchMetrics *metrics
                     pPilha->itens[pPilha->qtd - 1].PC = PC + 1;
                     PilhaPush(pPilha, (ItemPilha) {TI,0});
                     PilhaTopo(pPilha, &contextoAtual);
-                    printf("INTERRUPCAO DETECTADA - PC %d Salvo na Pilha: Executando Interrupção de ordem %d\n\n", PC, pPilha->qtd - 1);
+                    printf("INTERRUPCAO DETECTADA - PC %d Salvo na Pilha | Executando Interrupção de ordem %d\n\n", PC, pPilha->qtd - 1);
                     PC = 0;
                 }
                 else {

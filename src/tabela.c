@@ -10,11 +10,13 @@
 #include "structs.h" 
 
 //criando macros para evitar repetição
+
 #define H3  TAB_HOR TAB_HOR TAB_HOR 
 #define H6  TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
 #define H8  TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
 #define H12 TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
 #define H20 TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR TAB_HOR
+#define H144 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12
 #define QTD_TESTES 20
 //132 caracteres
 #define H132 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12 H12
@@ -31,7 +33,7 @@ void exibirInfoGeral(BenchMetrics *m, ConfigItem *configs) { // informações se
     printf(TAB_TL H132 TAB_TR "\n");
     printf(TAB_VER " Resumo da execucao:%112s" TAB_VER "\n", ""); 
     printf(TAB_ML H132 TAB_MR "\n");
-    printf(TAB_VER " %-18s%-10d KB %99s" TAB_VER "\n", "RAM Total:", TAM_RAM_DEFAULT, "");
+
     
     if (configs[ID_BUFFER].ativo) {
         printf(TAB_VER " %-18s%s%106s" TAB_VER "\n", "Write Buffer:", GREEN("ATIVADO"), "");
@@ -48,29 +50,46 @@ void exibirInfoGeral(BenchMetrics *m, ConfigItem *configs) { // informações se
     printf(TAB_BL H132 TAB_BR "\n\n");
 }
 
-void cabecalho() {
-    printf(TAB_TL H3 TAB_TJ H6 TAB_TJ H6 TAB_TJ H6);
-    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);   // L1
-    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);   // L2
-    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);   // L3
-    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H20 TAB_TR "\n"); // disco
+void cabecalho(ConfigItem *configs) {
+    // 1. Linha superior das bordas
+    printf(TAB_TL H3 TAB_TJ H6 TAB_TJ H6 TAB_TJ H6); // M, L1, L2, L3
+    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);       // L1
+    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);       // L2
+    printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);       // L3
+    printf(TAB_TJ H12 TAB_TJ H12);                  // RAM% e DISCO%
+    
+    // O "PULO DO GATO": Adiciona a borda para a nova coluna aqui também!
+    if (configs[ID_INTERRUPCAO].ativo) {
+        printf(TAB_TJ H12); 
+    }
+    
+    printf(TAB_TJ H20 TAB_TR "\n");
 
+    // 2. Nomes das colunas (Sincronizado com imprimirLinha)
     printf(TAB_VER " M " TAB_VER "  L1  " TAB_VER "  L2  " TAB_VER "  L3  ");
     printf(TAB_VER "    H.L1    " TAB_VER "   Hit L1%%  " TAB_VER "    M.L1    ");
     printf(TAB_VER "    H.L2    " TAB_VER "   Hit L2%%  " TAB_VER "    M.L2    ");
     printf(TAB_VER "    H.L3    " TAB_VER "   Hit L3%%  " TAB_VER "    M.L3    ");
-    printf(TAB_VER "  Hit RAM%%  " TAB_VER "   DISCO%%   " TAB_VER "        TEMPO       " TAB_VER "\n");
+    printf(TAB_VER "  Hit RAM%%  " TAB_VER "   DISCO%%   ");
+    
+    if (configs[ID_INTERRUPCAO].ativo) printf(TAB_VER "  T.REAL HD "); // ORDEM CORRETA
+    
+    printf(TAB_VER "        TEMPO       " TAB_VER "\n");
 
+    // 3. Linha divisória inferior do cabeçalho
     printf(TAB_ML H3 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6);
     printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
     printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
     printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
-    printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H20 TAB_MR "\n");
+    printf(TAB_MJ H12 TAB_MJ H12);
+    
+    if (configs[ID_INTERRUPCAO].ativo) printf(TAB_MJ H12);
+    
+    printf(TAB_MJ H20 TAB_MR "\n");
 }
 // vai imprimir os dados de cada configuração das caches, hits, miss, acesso na ram.
-void imprimirLinha(int id, BenchMetrics *m) { 
+void imprimirLinha(int id, BenchMetrics *m, ConfigItem *configs) { 
     long totalAcessos = m->hitsL1 + m->missesL1;
-    
     float pL1 = totalAcessos ? (float)m->hitsL1 * 100.0 / totalAcessos : 0.0;
     long tL2 = m->hitsL2 + m->missesL2;
     float pL2 = tL2 ? (float)m->hitsL2 * 100.0 / totalAcessos : 0.0;
@@ -81,20 +100,29 @@ void imprimirLinha(int id, BenchMetrics *m) {
     float pRAM = totalAcessos ? (float)m->hitsRAM * 100.0 / totalAcessos : 0.0; 
     float taxaHd = totalAcessos ? ((float)m->missesRAM / totalAcessos) * 100.0 : 0.0;
 
-    printf(TAB_VER " M%-d" TAB_VER " %-4d " TAB_VER " %-4d " TAB_VER " %-4d ",id, m->tamL1, m->tamL2, m->tamL3);
-    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ",m->hitsL1, pL1, m->missesL1);
-    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ",m->hitsL2, pL2, m->missesL2);
-    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ",m->hitsL3, pL3, m->missesL3);
-    printf(TAB_VER " %9.1f%% " TAB_VER " %9.1f%% " TAB_VER " %18ld " TAB_VER "\n",pRAM,taxaHd, m->relogio);
+    printf(TAB_VER " M%-d" TAB_VER " %-4d " TAB_VER " %-4d " TAB_VER " %-4d ", id, m->tamL1, m->tamL2, m->tamL3);
+    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL1, pL1, m->missesL1);
+    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL2, pL2, m->missesL2);
+    printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL3, pL3, m->missesL3);
+    printf(TAB_VER " %9.1f%% " TAB_VER " %9.1f%% ", pRAM, taxaHd);
+    
+    if (configs[ID_INTERRUPCAO].ativo) printf(TAB_VER " %9.4fs ", m->tempoHD); // POSIÇÃO SINCRONIZADA
+    
+    printf(TAB_VER " %18ld " TAB_VER "\n", m->relogio);
 }
 
 
-void rodape() { // imprime a parte de baixo da tabela, "fecha a tabela"
+void rodape(ConfigItem *configs) { // imprime a parte de baixo da tabela, "fecha a tabela"
     printf(TAB_BL H3 TAB_BJ H6 TAB_BJ H6 TAB_BJ H6);
     printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
     printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
     printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
-    printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H20 TAB_BR "\n"); // disco
+    printf(TAB_BJ H12 TAB_BJ H12);
+    
+    if (configs[ID_INTERRUPCAO].ativo) 
+        printf(TAB_BJ H12);
+    
+    printf(TAB_BJ H20 TAB_BR "\n");
 }
 
 void testePadrao(ConfigItem *configs) {
@@ -161,21 +189,27 @@ void testePadrao(ConfigItem *configs) {
     system("clear");
     printf("\n" BOLD(CYAN("Resultados:")) "\n");
     exibirInfoGeral(&totalizador, configs);
-    cabecalho();
+    cabecalho(configs);
 
     for (int i = 0; i < 5; i++) {
-        imprimirLinha(i + 1, &resultados[i]);
+        imprimirLinha(i + 1, &resultados[i], configs);
 
         if (i < 4) { 
-            printf(TAB_ML H3 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6);
+            printf(TAB_ML H3 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6); // Fixos
+            printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12); // Caches
             printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
             printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
-            printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
-            printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H20 TAB_MR "\n");//disco
+            printf(TAB_MJ H12 TAB_MJ H12); // RAM e Disco
+            
+            if (configs[ID_INTERRUPCAO].ativo) {
+                printf(TAB_MJ H12);
+            }
+
+            printf(TAB_MJ H20 TAB_MR "\n"); 
         }
     }
 
-    rodape();
+    rodape(configs);
     printf("\n" GREEN("Pressione ENTER para sair...") "\n");
     int c; 
     while ((c = getchar()) != '\n' && c != EOF);
@@ -208,9 +242,9 @@ void exibirRelatorioIndividual(BenchMetrics *m, ConfigItem *configs) {
     setbuf(stdout, NULL); 
     system("clear"); 
     exibirInfoGeral(m, configs);
-    cabecalho();
-    imprimirLinha(1, m);
-    rodape();
+    cabecalho(configs);
+    imprimirLinha(1, m, configs);
+    rodape(configs);
     printf("\n");
     printf("\n\nPressione ENTER para voltar ao menu...");
     getchar();
@@ -226,6 +260,8 @@ void inicializarMetricas(BenchMetrics *m) {
     m->relogio = 0;
     m->N_PROB = 0; 
     m->N_FOR = 0;
+
+    m->tempoHD = 0.0;
 }
 
 int selecionarProbabilidade() { // leitura da probabilidade
@@ -270,7 +306,7 @@ int selecionarNFor() { // leitura do numero de repetições, caso caia na probab
             return 5;
     }
 }
-void imprimirTabelaSalva(BenchMetrics *lista, int qtd) {
+void imprimirTabelaSalva(BenchMetrics *lista, int qtd, ConfigItem *configs) {
     endwin();
     setbuf(stdout, NULL);
     system("clear");
@@ -278,80 +314,87 @@ void imprimirTabelaSalva(BenchMetrics *lista, int qtd) {
     printf("\n" BOLD(MAGENTA("Tabela de resultados salvos")) "\n\n");
 
     if (qtd == 0) {
-        printf(RED("Nenhum resultado foi salvo ainda.") "\n");
+        printf(RED("Nenhum resultado foi morto/salvo ainda.") "\n");
     } else {
-        for(int i = 0; i < qtd; i++) {
-            printf(BOLD("Probabilidade de repeticao = %d %%  e tamanho do for = %d da M%-d\n"), lista[i].N_PROB, lista[i].N_FOR, i+1);
-        }
+        // --- CABEÇALHO SUPERIOR ---
+        printf(TAB_TL H3 TAB_TJ H8 TAB_TJ H6 TAB_TJ H6 TAB_TJ H6); // Fixos
+        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12); // Caches
+        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12); 
+        printf(TAB_TJ H12 TAB_TJ H12); // RAM e Disco
         
-        // --- LINHA SUPERIOR ---
-        printf(TAB_TL H3 TAB_TJ H8 TAB_TJ H6 TAB_TJ H6 TAB_TJ H6);        
-        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);     
-        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);     
-        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H12);     
-        printf(TAB_TJ H12 TAB_TJ H12 TAB_TJ H20 TAB_TR "\n");
+        if (configs[ID_INTERRUPCAO].ativo) printf(TAB_TJ H12); // COLUNA DINÂMICA
         
-        // --- CABEÇALHOS (Espaços ajustados milimetricamente para 12 e 20 caracteres) ---
+        printf(TAB_TJ H20 TAB_TR "\n");
+
+        // --- TÍTULOS DAS COLUNAS ---
         printf(TAB_VER " M " TAB_VER " Pol.   " TAB_VER "  L1  " TAB_VER "  L2  " TAB_VER "  L3  ");
         printf(TAB_VER "    H.L1    " TAB_VER "   Hit L1%%  " TAB_VER "    M.L1    ");
         printf(TAB_VER "    H.L2    " TAB_VER "   Hit L2%%  " TAB_VER "    M.L2    ");
         printf(TAB_VER "    H.L3    " TAB_VER "   Hit L3%%  " TAB_VER "    M.L3    ");
-        // CORRIGIDO AQUI: "   DISCO%%   " tem exatamente 3 espaços de cada lado (Total 12)
-        printf(TAB_VER "  Hit RAM%%  " TAB_VER "   DISCO%%   " TAB_VER "        TEMPO       " TAB_VER "\n");
+        printf(TAB_VER "  Hit RAM%%  " TAB_VER "   DISCO%%   ");
+        
+        if (configs[ID_INTERRUPCAO].ativo) printf(TAB_VER "  T.REAL HD ");
+        
+        printf(TAB_VER "        TEMPO       " TAB_VER "\n");
 
-        // --- DIVISÃO DO CABEÇALHO ---
+        // --- DIVISÓRIA DO CABEÇALHO ---
         printf(TAB_ML H3 TAB_MJ H8 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6);
         printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
         printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
         printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
-        printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H20 TAB_MR "\n");
+        printf(TAB_MJ H12 TAB_MJ H12);
+        
+        if (configs[ID_INTERRUPCAO].ativo) printf(TAB_MJ H12);
+        
+        printf(TAB_MJ H20 TAB_MR "\n");
 
         for (int i = 0; i < qtd; i++) {
             BenchMetrics *m = &lista[i];
-            
             long int totalAcessos = m->hitsL1 + m->missesL1;
+
             float pL1 = totalAcessos ? (float)m->hitsL1 * 100.0 / totalAcessos : 0.0;
-            
             long int tL2 = m->hitsL2 + m->missesL2;
             float pL2 = tL2 ? (float)m->hitsL2 * 100.0 / totalAcessos : 0.0;
-            
             long int tL3 = m->hitsL3 + m->missesL3;
             float pL3 = tL3 ? (float)m->hitsL3 * 100.0 / totalAcessos : 0.0;
-            
             float pRAM = totalAcessos ? (float)m->hitsRAM * 100.0 / totalAcessos : 0.0;
             float taxaHd = totalAcessos ? ((float)m->missesRAM / totalAcessos) * 100.0 : 0.0;
 
-            // --- IMPRESSÃO DOS DADOS ---
-            // CORRIGIDO AQUI: "M%-2d" crava o tamanho em 3 caracteres, não importa se for M1 ou M10
+            // --- DADOS DA LINHA ---
             printf(TAB_VER "M%-2d" TAB_VER " %-7s" TAB_VER " %-4d " TAB_VER " %-4d " TAB_VER " %-4d ", i + 1, m->policy, m->tamL1, m->tamL2, m->tamL3);
             printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL1, pL1, m->missesL1);
             printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL2, pL2, m->missesL2);
             printf(TAB_VER " %10d " TAB_VER " %9.1f%% " TAB_VER " %10d ", m->hitsL3, pL3, m->missesL3);
-            printf(TAB_VER " %9.1f%% " TAB_VER " %9.1f%% " TAB_VER " %18ld " TAB_VER "\n", pRAM, taxaHd, m->relogio);
+            printf(TAB_VER " %9.1f%% " TAB_VER " %9.1f%% ", pRAM, taxaHd);
+            
+            if (configs[ID_INTERRUPCAO].ativo) printf(TAB_VER " %9.4fs ", m->tempoHD);
+            
+            printf(TAB_VER " %18ld " TAB_VER "\n", m->relogio);
                    
-            // --- DIVISÃO ENTRE LINHAS (menos a última) ---
+            // --- SEPARADOR ENTRE LINHAS ---
             if (i < qtd - 1) {
                printf(TAB_ML H3 TAB_MJ H8 TAB_MJ H6 TAB_MJ H6 TAB_MJ H6); 
                printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
                printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
                printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H12);
-               printf(TAB_MJ H12 TAB_MJ H12 TAB_MJ H20 TAB_MR "\n");
+               printf(TAB_MJ H12 TAB_MJ H12);
+               if (configs[ID_INTERRUPCAO].ativo) printf(TAB_MJ H12);
+               printf(TAB_MJ H20 TAB_MR "\n");
             }
         }
         
-        // --- LINHA INFERIOR (Fechando a Tabela) ---
+        // --- RODAPÉ FINAL ---
         printf(TAB_BL H3 TAB_BJ H8 TAB_BJ H6 TAB_BJ H6 TAB_BJ H6);
         printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
         printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
         printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H12);
-        printf(TAB_BJ H12 TAB_BJ H12 TAB_BJ H20 TAB_BR "\n");
+        printf(TAB_BJ H12 TAB_BJ H12);
+        if (configs[ID_INTERRUPCAO].ativo) printf(TAB_BJ H12);
+        printf(TAB_BJ H20 TAB_BR "\n");
     }
 
     printf("\n" GREEN("Pressione ENTER para voltar ao menu...") "\n");
-    
-    // Trava a tela e limpa buffers residuais para não fechar sozinho
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    
     refresh();
 }

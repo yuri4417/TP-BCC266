@@ -28,8 +28,8 @@ int main() {
     char *opcoes_principal[] = {"Benchmark Unico", "Configuracoes", "Tabelas", "Sair"};
     int qtdSalva = 0;
 
-    // if(!criaHd())
-    //     return -1;
+    if(!criaHd())
+        return -1;
 
     while(rodando) {
         system("clear");
@@ -60,7 +60,7 @@ int main() {
                 int opcao = menu_run(opcoesSubMenu, 2, "Opcoes de tabelas");
                 switch(opcao) {
                     case 1:
-                        imprimirTabelaSalva(tabela, qtdSalva);
+                        imprimirTabelaSalva(tabela, qtdSalva, configs);
                         break; 
                     case 2:
                         testePadrao(configs);

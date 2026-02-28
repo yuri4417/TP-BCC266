@@ -321,7 +321,7 @@ int carregaRAM(Cache* L3, int blocoID, LinhaCache *RAM, WriteBuffer *buffer, Con
 
 
 
-int moveL1(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam) { // vai buscar o conteúdo nas caches ou na ram, e onde encontrar vai transferir pra l1
+int moveL1(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam, double *tempoHD) { // vai buscar o conteúdo nas caches ou na ram, e onde encontrar vai transferir pra l1
     // Já está na L1
     *relogio += CUSTO_L1;
     int pos = buscarCache(L1, add.endBloco, *relogio, configs);
@@ -358,20 +358,18 @@ int moveL1(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, Write
     // *relogio += CUSTO_HD;
     (*missesRam)++;
     *relogio += CUSTO_HD;
-    int posRAM = transfereHD(RAM, add.endBloco, relogio, configs);
+    int posRAM = transfereHD(RAM, add.endBloco, relogio, configs, tempoHD);
     if (posRAM != -1) {
         int novoposL3 = carregaRAM(L3, add.endBloco, RAM, buffer, configs, relogio);
         int novoposL2 = transfereCache(L3, L2, novoposL3, add.endBloco, relogio, RAM, buffer, configs, NULL);
         return transfereCache(L2, L1, novoposL2, add.endBloco, relogio, RAM, buffer, configs, L3);
     }
 
-
-
     return -1;
 }
 
-LinhaCache MMU_Read(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam) {
-    int posL1 = moveL1(add, L1, L2, L3, RAM, buffer, relogio, configs, hitsRam, missesRam);
+LinhaCache MMU_Read(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam, double *tempoHD) {
+    int posL1 = moveL1(add, L1, L2, L3, RAM, buffer, relogio, configs, hitsRam, missesRam, tempoHD);
 
     if (posL1 != -1)
         return L1->memoria[posL1];
@@ -380,10 +378,10 @@ LinhaCache MMU_Read(Endereco add, Cache *L1, Cache *L2, Cache *L3, LinhaCache *R
 
 }
 
-void MMU_Write(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, Endereco add, int valor, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam) {
+void MMU_Write(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, WriteBuffer *buffer, Endereco add, int valor, long int *relogio, ConfigItem *configs, int *hitsRam, int *missesRam, double *tempoHD) {
     int endpalavra = add.endPalavra;
 
-    int posL1 = moveL1(add, L1, L2, L3, RAM, buffer, relogio, configs, hitsRam, missesRam);
+    int posL1 = moveL1(add, L1, L2, L3, RAM, buffer, relogio, configs, hitsRam, missesRam, tempoHD);
     if (posL1 != -1) {
         L1->memoria[posL1].palavras[endpalavra] = valor;
         L1->memoria[posL1].alterado = true;

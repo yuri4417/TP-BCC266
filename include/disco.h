@@ -5,6 +5,5 @@
 
 bool criaHd();
 void salvaHD(LinhaCache *cache, int endHd, FILE *file);
-int transfereHD(LinhaCache* RAM, int endHD, long *relogio, ConfigItem *configs);
-
+int transfereHD(LinhaCache* RAM, int endHD, long *relogio, ConfigItem *configs, double *tempoHD);
 #endif 
