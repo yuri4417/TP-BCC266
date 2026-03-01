@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -111,9 +112,10 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     metrics->tamL1 = menu_valor("Tamanho da Cache L1 (em blocos)");
     metrics->tamL2 = menu_valor("Tamanho da Cache L2 (em blocos)");
     metrics->tamL3 = menu_valor("Tamanho da Cache L3 (em blocos)");
-    if (configs[ID_BUFFER].ativo)
+    if (configs[ID_BUFFER].ativo) 
         metrics->tamWriteBuffer = menu_valor("Tamanho do WriteBuffer");
-
+         
+    metrics->tempoTotal = 0.0;
     metrics->relogio = 0;
     metrics->hitsRAM = 0;
     metrics->missesRAM = 0;
@@ -123,20 +125,35 @@ void setupBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     }
     metrics->N_PROB = menu_valor("Probabilidade de Repeticao");
     metrics->N_FOR = menu_valor("Numero de Instrucoes na Repeticao");
-}
+    }
+    
+    
+void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs, Instrucao *programa, Instrucao *TI) {
+        endwin();
+        Cache *L1 = criaCache(metrics->tamL1); Cache *L2 = criaCache(metrics->tamL2); Cache *L3 = criaCache(metrics->tamL3); 
+        LinhaCache *RAM = (configs[ID_INTERRUPCAO].ativo) ? criaRAM(TAM_RAM_DEFAULT) : criaRAM_aleatoria(TAM_RAM_DEFAULT);
+        
+        int programaNulo = (!programa && !TI);
+        if (programaNulo) {
+            if (configs[ID_INTERRUPCAO].ativo)
+            geraInterrupcao(metrics->qtdInterrupcao, 5, metrics->N_FOR, 3, TAM_HD_DEFAULT, 4);
+            programa = (configs[ID_INTERRUPCAO].ativo) ? 
+            gerarInstrucoes(10000, TAM_HD_DEFAULT, metrics->N_PROB, metrics->PROB_INTERRUPCAO, metrics->N_FOR, 4) :
+            gerarInstrucoes(10000, TAM_RAM_DEFAULT, metrics->N_PROB, 0, metrics->N_FOR, 4);
 
-void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
-    endwin();
-    Cache *L1 = criaCache(metrics->tamL1); Cache *L2 = criaCache(metrics->tamL2); Cache *L3 = criaCache(metrics->tamL3); 
-    LinhaCache *RAM = (configs[ID_INTERRUPCAO].ativo) ? criaRAM(TAM_RAM_DEFAULT) : criaRAM_aleatoria(TAM_RAM_DEFAULT);
-    if (configs[ID_INTERRUPCAO].ativo)
-        geraInterrupcao(metrics->qtdInterrupcao, metrics->PROB_INTERRUPCAO / 10, metrics->N_FOR, 3, TAM_HD_DEFAULT, 4);
 
-    Instrucao *programa = (configs[ID_INTERRUPCAO].ativo) ? 
-    gerarInstrucoes(10000, TAM_HD_DEFAULT, metrics->N_PROB, metrics->PROB_INTERRUPCAO, metrics->N_FOR, 4) :
-    gerarInstrucoes(10000, TAM_RAM_DEFAULT, metrics->N_PROB, 0, metrics->N_FOR, 4);
-
-
+            TI = malloc(metrics->qtdInterrupcao * sizeof(Instrucao));
+            if (configs[ID_INTERRUPCAO].ativo) {
+                FILE *pFile = fopen("TI.txt", "r");
+                int i = 0;
+                while (i < metrics->qtdInterrupcao && 
+                       fscanf(pFile, "%d %d %d %d %d %d %d", &TI[i].opcode, &TI[i].add1.endBloco, &TI[i].add1.endPalavra,
+                        &TI[i].add2.endBloco, &TI[i].add2.endPalavra, &TI[i].add3.endBloco, &TI[i].add3.endPalavra) == 7) {
+                    i++;
+                }
+                fclose(pFile);
+            }
+        }
     WriteBuffer buffer;
     if (configs[ID_BUFFER].ativo) {
         buffer.fila = (ItemBuffer*) malloc(metrics->tamWriteBuffer * sizeof(ItemBuffer));
@@ -162,21 +179,18 @@ void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     if (!configs[ID_INTERRUPCAO].ativo)
         metrics->qtdInterrupcao = 1;
     
-    Instrucao *TI = malloc(metrics->qtdInterrupcao * sizeof(Instrucao));
-    if (configs[ID_INTERRUPCAO].ativo) {
-        FILE *pFile = fopen("TI.txt", "r");
-        int i = 0;
-        while (i < metrics->qtdInterrupcao && 
-               fscanf(pFile, "%d %d %d %d %d %d %d", &TI[i].opcode, &TI[i].add1.endBloco, &TI[i].add1.endPalavra,
-                &TI[i].add2.endBloco, &TI[i].add2.endPalavra, &TI[i].add3.endBloco, &TI[i].add3.endPalavra) == 7) {
-            i++;
-        }
-        fclose(pFile);
-    }
     
     PilhaExecucao *pPilha = criaPilha(4);
     PilhaPush(pPilha, (ItemPilha){programa, 0});
+
+    struct timespec inicio, fim;
+    clock_gettime(CLOCK_MONOTONIC, &inicio);
     cpu(L1, L2, L3, RAM, metrics, &buffer, configs, pPilha, TI, &metrics->hitsRAM, &metrics->missesRAM);
+    clock_gettime(CLOCK_MONOTONIC, &fim);
+    metrics->tempoTotal = (double)(fim.tv_sec - inicio.tv_sec) + (double) (fim.tv_nsec - inicio.tv_nsec) / 1000000000.0;
+
+
+
     metrics->hitsL1 = L1->hit; metrics->missesL1 = L1->miss;
     metrics->hitsL2 = L2->hit; metrics->missesL2 = L2->miss;
     metrics->hitsL3 = L3->hit; metrics->missesL3 = L3->miss;
@@ -186,11 +200,14 @@ void CacheBenchmark(BenchMetrics *metrics, ConfigItem *configs) {
     destroiCache(L1); destroiCache(L2); destroiCache(L3); 
     liberaRAM(RAM);
     destroiPilha(pPilha);
-    free(programa);
     if (configs[ID_BUFFER].ativo)
-        free(buffer.fila);
-    if (configs[ID_INTERRUPCAO].ativo)
-        free(TI);
+    free(buffer.fila);
+    
+    if (programaNulo) {
+        if (configs[ID_INTERRUPCAO].ativo)
+            free(TI);
+        free(programa);
+    }
 }
 
 /*

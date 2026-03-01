@@ -1,3 +1,6 @@
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -71,7 +74,7 @@ int transfereHD(LinhaCache* RAM, int endHD, long *relogio, ConfigItem *configs, 
         
         clock_gettime(CLOCK_MONOTONIC, &fim); 
         
-        *tempoHD += (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec - inicio.tv_nsec) / 1e9;
+        *tempoHD += (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec - inicio.tv_nsec) / 1000000000.0;
         RAM[posVazia] = linha;
         return posVazia;
     }
@@ -103,7 +106,7 @@ int transfereHD(LinhaCache* RAM, int endHD, long *relogio, ConfigItem *configs, 
     
     clock_gettime(CLOCK_MONOTONIC, &fim);
     
-    *tempoHD += (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec - inicio.tv_nsec) / 1e9;
+    *tempoHD += (fim.tv_sec - inicio.tv_sec) + (fim.tv_nsec - inicio.tv_nsec) / 1000000000.0;
     linha.prioridade = *relogio;
     RAM[posMenorPrioridade] = linha;
     return posMenorPrioridade;

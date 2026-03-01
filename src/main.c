@@ -39,7 +39,7 @@ int main() {
             case 1: // Manual
                 BenchMetrics m;
                 setupBenchmark(&m, configs);
-                CacheBenchmark(&m, configs);
+                CacheBenchmark(&m, configs, NULL, NULL);
                 if(configs[ID_INTERRUPCAO].ativo)
                 {
                     printf("\n" BOLD(YELLOW("--- FIM DA SIMULACAO ---")) "\n");

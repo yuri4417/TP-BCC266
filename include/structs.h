@@ -44,7 +44,7 @@ typedef struct {
     int N_PROB;
     int N_FOR;
 
-
+    double tempoTotal;
     double tempoHD;
 } BenchMetrics;
 

@@ -5,7 +5,7 @@
  
 void cabecalho(ConfigItem *configs);
 void imprimirLinha(int id, BenchMetrics *m, ConfigItem *configs);
-void rodape(ConfigItem *configs);
+void rodape();
 void salvaTabela(int *qtdSalva, BenchMetrics *tabelaSalva, BenchMetrics m);
 //fuções para imprimir a tabela
 void testePadrao(ConfigItem *configs);               // Fixa (M1 - M5)

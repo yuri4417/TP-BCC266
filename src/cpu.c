@@ -2,12 +2,12 @@
 #include "cpu.h"
 #include "ram.h"
 #include "pilha.h"
-
 #include "MMU.h"
 
 
 void cpu(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, BenchMetrics *metrics, WriteBuffer *buffer,
         ConfigItem *configs, PilhaExecucao *pPilha, Instrucao *TI, int *hitsRam, int *missesRam) {
+
     LinhaCache reg1, reg2, reg3;
     ItemPilha contextoAtual;
     int PC = 0; 
@@ -16,6 +16,9 @@ void cpu(Cache *L1, Cache *L2, Cache *L3, LinhaCache *RAM, BenchMetrics *metrics
         PilhaTopo(pPilha, &contextoAtual);
         PC = contextoAtual.PC;
     }
+
+    
+
     while (pPilha->qtd > 0) {
 
         Instrucao atual = contextoAtual.programa[PC];
